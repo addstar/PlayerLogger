@@ -23,8 +23,6 @@ public class filehandler {
 		plugin = instance;
 	}
 
-
-
 	//Login
 	public static void logLogin(String playername, String worldname, double x,
 			double y, double z, String ip, Boolean staff) {
