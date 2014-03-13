@@ -1,6 +1,6 @@
 name: PlayerLogger
 
-version: 2.9
+version: 2.9.1
 
 description: Logs player events.
 
