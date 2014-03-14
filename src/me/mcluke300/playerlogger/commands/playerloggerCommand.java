@@ -9,7 +9,7 @@ import me.mcluke300.playerlogger.playerlogger;
 import me.mcluke300.playerlogger.config.getConfig;
 import me.mcluke300.playerlogger.mysql.mysql;
 
-public class playerloggerCommand implements CommandExecutor{
+public class playerloggerCommand implements CommandExecutor {
 
 	private playerlogger plugin;
 
@@ -17,23 +17,28 @@ public class playerloggerCommand implements CommandExecutor{
 		this.plugin = plugin;
 	}
 
-	//Reload Command
+	// Reload Command
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-		if(commandLabel.equalsIgnoreCase("playerlogger")){
-			if (args.length == 0) {
-				sender.sendMessage(ChatColor.RED+"Usage: /playerlogger reload");
-				return false;
-			} else if (args.length == 1){
-
-				//Reload
-				if (args[0].equalsIgnoreCase("reload") && sender.hasPermission("PlayerLogger.reload")) {
-					plugin.reloadConfig();
-					getConfig.getValues();
-					mysql.createDatabase();
-					sender.sendMessage(ChatColor.GREEN+"PlayerLogger Config Reloaded");
+		if (commandLabel.equalsIgnoreCase("playerlogger")) {
+			if (sender.hasPermission("playerlogger.admin")) {
+				if (args.length == 0) {
+					sender.sendMessage(ChatColor.RED + "Usage: /playerlogger reload");
+					return false;
+				} else if (args.length == 1) {
+	
+					// Reload
+					if (args[0].equalsIgnoreCase("reload") && sender.hasPermission("PlayerLogger.reload")) {
+						plugin.reloadConfig();
+						getConfig.getValues();
+						mysql.createDatabase();
+						sender.sendMessage(ChatColor.GREEN + "PlayerLogger Config Reloaded");
+					}
+	
+				} else if (args.length < 2) {
+					return false;
 				}
-
-			} else if (args.length < 2) {
+			} else {
+				sender.sendMessage(ChatColor.RED + "You do not have permission for this command.");
 				return false;
 			}
 		}

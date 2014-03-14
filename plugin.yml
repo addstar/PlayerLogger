@@ -1,13 +1,13 @@
 name: PlayerLogger
-
 version: ${project.version}
-
 description: Logs player events.
-
 author: McLuke300, add5tar
-
 main: me.mcluke300.playerlogger.playerlogger
 
 commands:
-   Playerlogger:
+   playerlogger:
       description: Playerlogger commands
+
+permissions:
+  playerlogger.admin:
+      description: Full access to all commands (admin)
