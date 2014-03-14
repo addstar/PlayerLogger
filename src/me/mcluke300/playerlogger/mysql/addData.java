@@ -4,8 +4,11 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.LinkedList;
 
 import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
 
 import me.mcluke300.playerlogger.playerlogger;
 import me.mcluke300.playerlogger.config.*;
@@ -13,46 +16,136 @@ import me.mcluke300.playerlogger.config.*;
 public class addData {
 	playerlogger plugin;
 	Connection con = null;
+	LinkedList<DataRec> Records = new LinkedList<DataRec>();
 
 	public addData(playerlogger instance) {
 		plugin = instance;
 		try {
-			con = DriverManager.getConnection("jdbc:mysql://" + getConfig.MySQLServer() + "/" + getConfig.MySQLDatabase() , getConfig.MySQLUser(), getConfig.MySQLPassword());
+			con = DriverManager.getConnection("jdbc:mysql://" + getConfig.MySQLServer() + "/" + getConfig.MySQLDatabase(), getConfig.MySQLUser(), getConfig.MySQLPassword());
+			if (con != null) {
+				con.setAutoCommit(false);
+				startWriterTask();
+			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	//MySQL
-	public void add(final String playername, final String type, final String data, final double x, final double y, final double z, final String worldname, final Boolean staff) {
+	static class DataRec {
+		String playername;
+		String type;
+		String data;
+		String worldname;
+		int x;
+		int y;
+		int z;
+	}
+
+	// MySQL
+	public void add(Player player, String type, String data, World world) {
+		if (con == null) return;
+		
+		int x = 0, y = 0, z = 0;
+
+		DataRec rec = new DataRec();
+
+		if (player != null) {
+			x = player.getLocation().getBlockX();
+			y = player.getLocation().getBlockY();
+			z = player.getLocation().getBlockZ();
+			rec.playername = player.getName();
+		} else {
+			rec.playername = "";
+		}
+
+		if (world != null) {
+			rec.worldname = world.getName();
+		} else {
+			rec.worldname = "";
+		}
+
+		rec.type = type;
+		rec.data = data;
+		rec.x = x;
+		rec.y = y;
+		rec.z = z;
+
+		// Add record to list
+		int count = 0;
+		synchronized (Records) {
+			Records.add(rec);
+			count = Records.size();
+		}
+		
+		if (count > 50) {
+			plugin.DebugLog("Queue limit reached, forcing save.");
+			writeBuffer();
+		}
+	}
+
+	public void startWriterTask() {
+		Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
+			@Override
+			public void run() {
+				writeBuffer();
+			}
+		}, 400L, 400L);
+	}
+	
+	public boolean writeBuffer() {
+		int count = 0;
+		synchronized (Records) {
+			count = Records.size();
+		}
+
+		if (count == 0) {
+			// Nothing to write
+			plugin.DebugLog("Queue is empty. Nothing to write.");
+			return false;
+		}
+		
+		plugin.DebugLog("Launching save task for " + count + " queued records...");
 		Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
-		    @Override
-		    public void run() {			
+			@Override
+			public void run() {
 				PreparedStatement pst = null;
-				long time = System.currentTimeMillis()/1000; //Unix time
-				//Checking if they should be logged
-				if (staff && getConfig.LogOnlyStaff() || !getConfig.LogOnlyStaff()) {
-					try {
-						String database = "playerlogger";
-						//Prepared statement
-						pst = con.prepareStatement("INSERT INTO " +database+"(playername, type, time, data, x, y, z, world) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
-						//Values
-						pst.setString(1, playername);
-						pst.setString(2, type);
-						pst.setLong(3, time);
-						pst.setString(4, data);
-						pst.setDouble(5, x);
-						pst.setDouble(6, y);
-						pst.setDouble(7, z);
-						pst.setString(8, worldname);
-						//Do the MySQL query
-						pst.executeUpdate();
-					} catch (SQLException ex) {
-						ex.printStackTrace();
+				long time = System.currentTimeMillis() / 1000; // Unix time
+				try {
+					String tablename = "`playerlogger`";
+					
+					LinkedList<DataRec> copy = null;
+					synchronized (Records) {
+						copy = (LinkedList) Records.clone();
+						Records.clear();
 					}
+					plugin.DebugLog("Saving " + copy.size() + " records...");
+					
+					// Prepared statement
+					pst = con.prepareStatement("INSERT INTO "+ tablename +" (playername, type, time, data, x, y, z, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+					
+					// Save all the queued records
+					for (DataRec rec: copy) {
+						// Values
+						pst.setString(1, rec.playername);
+						pst.setString(2, rec.type);
+						pst.setLong(3, time);
+						pst.setString(4, rec.data);
+						pst.setInt(5, rec.x);
+						pst.setInt(6, rec.y);
+						pst.setInt(7, rec.z);
+						pst.setString(8, rec.worldname);
+						
+						// Do the MySQL query
+						pst.executeUpdate();
+					}
+					copy.clear();
+					con.commit();
+				} catch (SQLException ex) {
+					ex.printStackTrace();
 				}
 			}
 		});
+		return true;
 	}
 }

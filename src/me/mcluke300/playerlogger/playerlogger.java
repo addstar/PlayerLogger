@@ -1,7 +1,5 @@
 package me.mcluke300.playerlogger;
 
-import java.io.File;
-import java.io.IOException;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -12,55 +10,36 @@ import me.mcluke300.playerlogger.mysql.mysql;
 
 public class playerlogger extends JavaPlugin {
 
-	//Making Directory
-	File subdir = new File("plugins/PlayerLogger/Users");
-	File subdir2 = new File("plugins/PlayerLogger/Staff");
-	
-	//Plugin
+	// Plugin
 	public static playerlogger plugin;
-	
-	//Command
+
+	// Command
 	private playerloggerCommand executor;
-	
+
 	@Override
 	public void onEnable() {
 		plugin = this;
-		
-		//Creating the folders
-		if (!subdir.exists()) {
-			subdir.mkdir();
-		}
-		if (plugin.getConfig().getBoolean("Log.SeparateFolderforStaff")) {
-			if (!subdir2.exists()) {
-				subdir2.mkdir();
-			}
-		}
-		
+
 		config.LoadConfiguration();
 		getConfig.getValues();
 		mysql.createDatabase();
-		
-		//Registering Listeners
+
+		// Registering Listeners
 		Bukkit.getServer().getPluginManager().registerEvents(new PListener(this), this);
-		
-		//Commands
+
+		// Commands
 		executor = new playerloggerCommand(this);
 		getCommand("playerlogger").setExecutor(executor);
-		
-		//Metrics
-		try {
-			MetricsLite metrics = new MetricsLite(this);
-			metrics.start();
-		} catch (IOException e) {
-			// Failed to submit the stats :-(
-		}
-		
-}
-
-	
-	@Override
-	public void onDisable() {
-		//Do Nothing
 	}
 
+	@Override
+	public void onDisable() {
+		// Do Nothing
+	}
+
+	public void DebugLog(String msg) {
+		if (getConfig.Debug()) {
+			System.out.println("[PlayerLogger] " + msg);
+		}
+	}
 }
