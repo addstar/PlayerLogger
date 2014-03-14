@@ -1,10 +1,10 @@
 name: PlayerLogger
 
-version: 2.9.1
+version: ${project.version}
 
 description: Logs player events.
 
-author: McLuke300
+author: McLuke300, add5tar
 
 main: me.mcluke300.playerlogger.playerlogger
 
