@@ -42,4 +42,8 @@ public class playerlogger extends JavaPlugin {
 			System.out.println("[PlayerLogger] " + msg);
 		}
 	}
+
+	public void Log(String msg) {
+		System.out.println("[PlayerLogger] " + msg);
+	}
 }

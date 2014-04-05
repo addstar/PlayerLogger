@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.LinkedList;
 
 import org.bukkit.Bukkit;
@@ -21,10 +22,16 @@ public class addData {
 	public addData(playerlogger instance) {
 		plugin = instance;
 		try {
-			con = DriverManager.getConnection("jdbc:mysql://" + getConfig.MySQLServer() + "/" + getConfig.MySQLDatabase(), getConfig.MySQLUser(), getConfig.MySQLPassword());
-			if (con != null) {
+			if (ConnectDB()) {
 				con.setAutoCommit(false);
 				startWriterTask();
+
+				Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
+					@Override
+					public void run() {
+						pingDB();
+					}
+				}, 1200L, 1200L);
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -40,6 +47,32 @@ public class addData {
 		int x;
 		int y;
 		int z;
+	}
+	
+	public boolean ConnectDB() {
+		// Close existing connection if there is one
+		if (con != null) {
+			try {
+				con.close();
+			} catch (SQLException e) {
+				plugin.Log("WARNING: Unable to close database connection!");
+				e.printStackTrace();
+			}
+		}
+
+		// Attempt to make a connection
+		try {
+			con = DriverManager.getConnection("jdbc:mysql://" + getConfig.MySQLServer() + "/" + getConfig.MySQLDatabase(), getConfig.MySQLUser(), getConfig.MySQLPassword());
+		} catch (SQLException e) {
+			plugin.Log("ERROR: Unable to connect to database!");
+			e.printStackTrace();
+		}
+		
+		if (con == null) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	// MySQL
@@ -104,6 +137,11 @@ public class addData {
 			plugin.DebugLog("Queue is empty. Nothing to write.");
 			return false;
 		}
+
+		if (con == null) {
+			plugin.Log("WARNING: No valid database connection - Not writing record queue");
+			return false;
+		}
 		
 		plugin.DebugLog("Launching save task for " + count + " queued records...");
 		Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
@@ -147,5 +185,18 @@ public class addData {
 			}
 		});
 		return true;
+	}
+
+	public void pingDB() {
+		try {
+			Statement st = con.createStatement();
+			st.executeQuery("/* ping */ SELECT 1");
+		} catch (SQLException e) {
+			plugin.Log("WARNING: MySQL database ping failed!");
+			plugin.Log("Reconnecting to database...");
+			ConnectDB();
+			e.printStackTrace();
+		}
+		
 	}
 }
