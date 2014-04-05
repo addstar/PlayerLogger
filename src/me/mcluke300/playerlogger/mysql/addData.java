@@ -21,21 +21,15 @@ public class addData {
 
 	public addData(playerlogger instance) {
 		plugin = instance;
-		try {
-			if (ConnectDB()) {
-				con.setAutoCommit(false);
-				startWriterTask();
+		if (ConnectDB()) {
+			startWriterTask();
 
-				Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
-					@Override
-					public void run() {
-						pingDB();
-					}
-				}, 1200L, 1200L);
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
+				@Override
+				public void run() {
+					pingDB();
+				}
+			}, 1200L, 1200L);
 		}
 	}
 
@@ -53,6 +47,7 @@ public class addData {
 		// Close existing connection if there is one
 		if (con != null) {
 			try {
+				con.commit();
 				con.close();
 			} catch (SQLException e) {
 				plugin.Log("WARNING: Unable to close database connection!");
@@ -63,6 +58,7 @@ public class addData {
 		// Attempt to make a connection
 		try {
 			con = DriverManager.getConnection("jdbc:mysql://" + getConfig.MySQLServer() + "/" + getConfig.MySQLDatabase(), getConfig.MySQLUser(), getConfig.MySQLPassword());
+			con.setAutoCommit(false);
 		} catch (SQLException e) {
 			plugin.Log("ERROR: Unable to connect to database!");
 			e.printStackTrace();
