@@ -57,7 +57,7 @@ public class addData {
 
 		// Attempt to make a connection
 		try {
-			con = DriverManager.getConnection("jdbc:mysql://" + getConfig.MySQLServer() + "/" + getConfig.MySQLDatabase(), getConfig.MySQLUser(), getConfig.MySQLPassword());
+			con = DriverManager.getConnection("jdbc:mysql://" + getConfig.MySQLServer() + "/" + getConfig.MySQLDatabase() + "?useUnicode=yes&characterEncoding=UTF-8", getConfig.MySQLUser(), getConfig.MySQLPassword());
 			con.setAutoCommit(false);
 		} catch (SQLException e) {
 			plugin.Log("ERROR: Unable to connect to database!");
