@@ -113,6 +113,38 @@ public class addData {
 		}
 	}
 
+	public void textadd(String player, String type, String data, String world) {
+		if (con == null) return;
+	
+		int x = 0, y = 0, z = 0;
+		
+		DataRec rec = new DataRec();
+
+		rec.playername = player;
+		if (world != null) {
+			rec.worldname = world;
+		} else {
+			rec.worldname = "";
+		}
+		rec.type = type;
+		rec.data = data;
+		rec.x = x;
+		rec.y = y;
+		rec.z = z;
+
+		// Add record to list
+		int count = 0;
+		synchronized (Records) {
+			Records.add(rec);
+			count = Records.size();
+		}
+		
+		if (count > 50) {
+			plugin.DebugLog("Queue limit reached, forcing save.");
+			writeBuffer();
+		}
+	}
+	
 	public void startWriterTask() {
 		Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
 			@Override

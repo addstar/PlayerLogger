@@ -77,7 +77,8 @@ public class PListener implements Listener {
 	public void onPlayerWebChat(final DynmapWebChatEvent event) {
 		if (getConfig.PlayerChat()) {
 			String msg = event.getMessage();
-			datadb.add(null, "webchat", msg, null);
+			String playername = event.getName();
+			datadb.textadd(playername, "webchat", msg, null);
 		}
 	}
 
