@@ -26,6 +26,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.inventory.ItemStack;
+import org.dynmap.DynmapWebChatEvent;
 
 public class PListener implements Listener {
 	playerlogger plugin;
@@ -68,6 +69,15 @@ public class PListener implements Listener {
 			World world = player.getWorld();
 			String msg = event.getMessage();
 			datadb.add(player, "chat", msg, world);
+		}
+	}
+
+	// Player Web Chat
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onPlayerWebChat(final DynmapWebChatEvent event) {
+		if (getConfig.PlayerChat()) {
+			String msg = event.getMessage();
+			datadb.add(null, "webchat", msg, null);
 		}
 	}
 

@@ -31,6 +31,10 @@
       <id>addstar-repo</id>
       <url>http://maven.addstar.com.au/artifactory/ext-release-local</url>
     </repository>
+    <repository>
+      <id>dynmap-repo</id>
+      <url>http://repo.mikeprimm.com/</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -40,7 +44,13 @@
       <artifactId>bukkit</artifactId>
       <version>1.7.2-R0.1-SNAPSHOT</version>
     </dependency>
-    
+
+    <dependency>
+      <groupId>org.dynmap</groupId>
+      <artifactId>dynmap-api</artifactId>
+      <version>1.9</version>
+    </dependency>  
+  
     <!-- CraftBukkit Dependency for experimental features
     <dependency>
       <groupId>org.bukkit</groupId>
