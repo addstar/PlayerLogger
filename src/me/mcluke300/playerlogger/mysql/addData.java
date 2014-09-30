@@ -43,6 +43,7 @@ public class addData {
 		int x;
 		int y;
 		int z;
+		long time;
 	}
 	
 	public boolean ConnectDB() {
@@ -101,6 +102,7 @@ public class addData {
 		rec.x = x;
 		rec.y = y;
 		rec.z = z;
+		rec.time = System.currentTimeMillis() / 1000; // Unix time
 
 		// Add record to list
 		int count = 0;
@@ -146,7 +148,6 @@ public class addData {
 			@Override
 			public void run() {
 				PreparedStatement pst = null;
-				long time = System.currentTimeMillis() / 1000; // Unix time
 				try {
 					String tablename = "`" + getConfig.MySQLTable() + "`";
 					
@@ -165,7 +166,7 @@ public class addData {
 						// Values
 						pst.setString(1, rec.playername);
 						pst.setString(2, rec.type);
-						pst.setLong(3, time);
+						pst.setLong(3, rec.time);
 						pst.setString(4, rec.data);
 						pst.setInt(5, rec.x);
 						pst.setInt(6, rec.y);
