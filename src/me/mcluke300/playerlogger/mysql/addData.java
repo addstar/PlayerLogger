@@ -171,7 +171,7 @@ public class addData {
 						pst.setInt(6, rec.y);
 						pst.setInt(7, rec.z);
 						pst.setString(8, rec.worldname);
-						pst.setString(8, servername);
+						pst.setString(9, servername);
 						
 						// Do the MySQL query
 						pst.executeUpdate();
