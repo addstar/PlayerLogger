@@ -19,7 +19,7 @@ public class mysql {
 			connection = DriverManager.getConnection("jdbc:mysql://" + getConfig.MySQLServer() + "/" + getConfig.MySQLDatabase(), getConfig.MySQLUser(), getConfig.MySQLPassword());
 			st = connection.createStatement();
 			// Make table if it does not exist query onEnable
-			rs = st.executeUpdate("CREATE TABLE IF NOT EXISTS `playerlogger`"
+			rs = st.executeUpdate("CREATE TABLE IF NOT EXISTS `" + getConfig.MySQLTable() + "`"
 					+ "(`id` INT(11) unsigned NOT NULL AUTO_INCREMENT,"
 					+ "`playername` text,"
 					+ "`type` text,"
