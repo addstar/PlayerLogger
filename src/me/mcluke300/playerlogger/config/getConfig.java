@@ -36,6 +36,7 @@ public class getConfig {
 	private static String MySQLDatabase;
 	private static String MySQLUser;
 	private static String MySQLPassword;
+	private static String MySQLTable;
 
 	// Called OnEnable and on Reload to save the values
 	public static void getValues() {
@@ -64,6 +65,7 @@ public class getConfig {
 		MySQLDatabase = playerlogger.plugin.getConfig().getString("MySQL.Database");
 		MySQLUser = playerlogger.plugin.getConfig().getString("MySQL.User");
 		MySQLPassword = playerlogger.plugin.getConfig().getString("MySQL.Password");
+		MySQLTable = playerlogger.plugin.getConfig().getString("MySQL.Table");
 	}
 
 	public static boolean PlayerJoins() {
@@ -140,6 +142,10 @@ public class getConfig {
 
 	public static String MySQLPassword() {
 		return MySQLPassword;
+	}
+
+	public static String MySQLTable() {
+		return MySQLTable;
 	}
 
 	public static boolean Debug() {

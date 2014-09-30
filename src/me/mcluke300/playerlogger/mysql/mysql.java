@@ -19,7 +19,18 @@ public class mysql {
 			connection = DriverManager.getConnection("jdbc:mysql://" + getConfig.MySQLServer() + "/" + getConfig.MySQLDatabase(), getConfig.MySQLUser(), getConfig.MySQLPassword());
 			st = connection.createStatement();
 			// Make table if it does not exist query onEnable
-			rs = st.executeUpdate("CREATE TABLE IF NOT EXISTS `playerlogger`( `id` MEDIUMINT NOT NULL AUTO_INCREMENT, `playername` text, `type` text, `time` INT(255), `data` text, `x` MEDIUMINT(255), `y` MEDIUMINT(255), `z` MEDIUMINT(255), `world` text, PRIMARY KEY (`id`))");
+			rs = st.executeUpdate("CREATE TABLE IF NOT EXISTS `playerlogger`"
+					+ "(`id` MEDIUMINT NOT NULL AUTO_INCREMENT,"
+					+ "`playername` text,"
+					+ "`type` text,"
+					+ "`time` INT(255),"
+					+ "`data` text,"
+					+ "`x` MEDIUMINT(255),"
+					+ "`y` MEDIUMINT(255),"
+					+ "`z` MEDIUMINT(255),"
+					+ "`world` varchar(40),"
+					+ "`server` varchar(20),"
+					+ "PRIMARY KEY (`id`))");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.out.print(rs);

@@ -18,6 +18,7 @@ public class addData {
 	playerlogger plugin;
 	Connection con = null;
 	LinkedList<DataRec> Records = new LinkedList<DataRec>();
+	String servername = Bukkit.getServerName();
 
 	public addData(playerlogger instance) {
 		plugin = instance;
@@ -38,6 +39,7 @@ public class addData {
 		String type;
 		String data;
 		String worldname;
+		String servername;
 		int x;
 		int y;
 		int z;
@@ -146,7 +148,7 @@ public class addData {
 				PreparedStatement pst = null;
 				long time = System.currentTimeMillis() / 1000; // Unix time
 				try {
-					String tablename = "`playerlogger`";
+					String tablename = "`" + getConfig.MySQLTable() + "`";
 					
 					LinkedList<DataRec> copy = null;
 					synchronized (Records) {
@@ -156,7 +158,7 @@ public class addData {
 					plugin.DebugLog("Saving " + copy.size() + " records...");
 					
 					// Prepared statement
-					pst = con.prepareStatement("INSERT INTO "+ tablename +" (playername, type, time, data, x, y, z, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+					pst = con.prepareStatement("INSERT INTO "+ tablename +" (playername, type, time, data, x, y, z, world, server) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 					
 					// Save all the queued records
 					for (DataRec rec: copy) {
@@ -169,6 +171,7 @@ public class addData {
 						pst.setInt(6, rec.y);
 						pst.setInt(7, rec.z);
 						pst.setString(8, rec.worldname);
+						pst.setString(8, servername);
 						
 						// Do the MySQL query
 						pst.executeUpdate();

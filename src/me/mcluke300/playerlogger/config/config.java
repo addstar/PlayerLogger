@@ -44,6 +44,7 @@ public class config {
 		playerlogger.plugin.getConfig().addDefault("Commands.CommandsToBlock", cmds);
 		playerlogger.plugin.getConfig().addDefault("MySQL.Server", "localhost");
 		playerlogger.plugin.getConfig().addDefault("MySQL.Database", "playerlogger");
+		playerlogger.plugin.getConfig().addDefault("MySQL.Table", "playerlogger");
 		playerlogger.plugin.getConfig().addDefault("MySQL.User", "user");
 		playerlogger.plugin.getConfig().addDefault("MySQL.Password", "password");
 		playerlogger.plugin.getConfig().addDefault("System.Debug", false);
