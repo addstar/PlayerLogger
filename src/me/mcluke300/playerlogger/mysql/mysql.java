@@ -20,7 +20,7 @@ public class mysql {
 			st = connection.createStatement();
 			// Make table if it does not exist query onEnable
 			rs = st.executeUpdate("CREATE TABLE IF NOT EXISTS `playerlogger`"
-					+ "(`id` MEDIUMINT NOT NULL AUTO_INCREMENT,"
+					+ "(`id` INT(11) unsigned NOT NULL AUTO_INCREMENT,"
 					+ "`playername` text,"
 					+ "`type` text,"
 					+ "`time` INT(255),"
@@ -30,7 +30,10 @@ public class mysql {
 					+ "`z` MEDIUMINT(255),"
 					+ "`world` varchar(40),"
 					+ "`server` varchar(20),"
-					+ "PRIMARY KEY (`id`))");
+					+ "PRIMARY KEY (`id`),"
+					+ "KEY `time` (`time`),"
+					+ "KEY `playername` (`playername`),"
+					+ "KEY `type` (`type`))");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.out.print(rs);
