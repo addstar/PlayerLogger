@@ -181,6 +181,14 @@ public class addData {
 					con.commit();
 				} catch (SQLException ex) {
 					ex.printStackTrace();
+				} finally {
+					try {
+						if (pst != null) pst.close();
+						pst = null;
+					} catch (SQLException e) {
+						plugin.Log("ERROR: Failed to close PreparedStatement!");
+						e.printStackTrace();
+					}
 				}
 			}
 		});
