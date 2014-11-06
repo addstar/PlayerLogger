@@ -196,15 +196,23 @@ public class addData {
 	}
 
 	public void pingDB() {
+		Statement st = null;
 		try {
-			Statement st = con.createStatement();
+			st = con.createStatement();
 			st.executeQuery("/* ping */ SELECT 1");
 		} catch (SQLException e) {
 			plugin.Log("WARNING: MySQL database ping failed!");
 			plugin.Log("Reconnecting to database...");
 			ConnectDB();
 			e.printStackTrace();
+		} finally {
+			try {
+				if (st != null) st.close();
+				st = null;
+			} catch (SQLException e) {
+				plugin.Log("ERROR: Failed to close Statement!");
+				e.printStackTrace();
+			}
 		}
-		
 	}
 }
