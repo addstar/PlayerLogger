@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -44,6 +45,7 @@ public class addData {
 		int y;
 		int z;
 		long time;
+		byte cancelled;
 	}
 	
 	public boolean ConnectDB() {
@@ -76,6 +78,10 @@ public class addData {
 
 	// MySQL
 	public void add(Player player, String type, String data, World world) {
+		add(player, type, data, world, false);
+	}
+
+	public void add(Player player, String type, String data, World world, boolean cancelled) {
 		if (con == null) return;
 		
 		int x = 0, y = 0, z = 0;
@@ -103,6 +109,11 @@ public class addData {
 		rec.y = y;
 		rec.z = z;
 		rec.time = System.currentTimeMillis() / 1000; // Unix time
+
+		if (cancelled)
+			rec.cancelled = (byte)1;
+		else
+			rec.cancelled = (byte)0;
 
 		// Add record to list
 		int count = 0;
@@ -159,7 +170,7 @@ public class addData {
 					plugin.DebugLog("Saving " + copy.size() + " records...");
 					
 					// Prepared statement
-					pst = con.prepareStatement("INSERT INTO "+ tablename +" (playername, type, time, data, x, y, z, world, server) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+					pst = con.prepareStatement("INSERT INTO "+ tablename +" (playername, type, time, data, x, y, z, world, server, cancelled) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 					
 					// Save all the queued records
 					for (DataRec rec: copy) {
@@ -173,6 +184,7 @@ public class addData {
 						pst.setInt(7, rec.z);
 						pst.setString(8, rec.worldname);
 						pst.setString(9, servername);
+						pst.setByte(10, rec.cancelled);
 						
 						// Do the MySQL query
 						pst.executeUpdate();
