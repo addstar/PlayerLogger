@@ -1,5 +1,6 @@
 package me.mcluke300.playerlogger.listeners;
 
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 import me.mcluke300.playerlogger.playerlogger;
@@ -31,9 +32,12 @@ public class PListener implements Listener {
 	playerlogger plugin;
 	addData datadb;
 
+	IdentityHashMap<AsyncPlayerChatEvent, String> cachedChatEvents;
+
 	public PListener(playerlogger instance) {
 		plugin = instance;
 		datadb = new addData(plugin);
+		cachedChatEvents = new IdentityHashMap<AsyncPlayerChatEvent, String>();
 	}
 
 	// Player Join
@@ -60,19 +64,39 @@ public class PListener implements Listener {
 		}
 	}
 
-	// Player Chat
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	// Player Chat (Lowest)
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+	public void onPlayerChatLowest(final AsyncPlayerChatEvent event) {
+		synchronized (cachedChatEvents) {
+			cachedChatEvents.put(event, event.getMessage());
+		}
+	}
+
+	// Player Chat (Monitor)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
 	public void onPlayerChat(final AsyncPlayerChatEvent event) {
+
+		String origMessage;
+		synchronized (cachedChatEvents) {
+			origMessage = cachedChatEvents.remove(event);
+		}
+
 		if (getConfig.PlayerChat()) {
 			Player player = event.getPlayer();
 			World world = player.getWorld();
 			String msg = event.getMessage();
-			datadb.add(player, "chat", msg, world);
+
+			if (origMessage != null && !origMessage.equals(msg)) {
+				// The message has been altered
+				msg = origMessage + " --> " + msg;
+			}
+
+			datadb.add(player, "chat", msg, world, event.isCancelled());
 		}
 	}
 
 	// Player Command
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
 	public void onPlayerCmd(final PlayerCommandPreprocessEvent event) {
 		if (getConfig.PlayerCommands()) {
 			Player player = event.getPlayer();
@@ -91,7 +115,7 @@ public class PListener implements Listener {
 			}
 			// Log this command
 			if (log) {
-				datadb.add(player, "command", msg, world);
+				datadb.add(player, "command", msg, world, event.isCancelled());
 			}
 		}
 	}
