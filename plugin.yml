@@ -4,6 +4,8 @@ description: Logs player events.
 author: McLuke300, add5tar
 main: me.mcluke300.playerlogger.playerlogger
 
+loadbefore: [PwnFilter]
+
 commands:
    playerlogger:
       description: Playerlogger commands

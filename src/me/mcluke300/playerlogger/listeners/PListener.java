@@ -23,6 +23,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerCommandEvent;
@@ -32,12 +33,14 @@ public class PListener implements Listener {
 	playerlogger plugin;
 	addData datadb;
 
-	IdentityHashMap<AsyncPlayerChatEvent, String> cachedChatEvents;
+	IdentityHashMap<PlayerEvent, String> cachedEvents;
+	IdentityHashMap<SignChangeEvent, String> cachedSignEvents;
 
 	public PListener(playerlogger instance) {
 		plugin = instance;
 		datadb = new addData(plugin);
-		cachedChatEvents = new IdentityHashMap<AsyncPlayerChatEvent, String>();
+		cachedEvents = new IdentityHashMap<PlayerEvent, String>();
+		cachedSignEvents = new IdentityHashMap<SignChangeEvent, String>();
 	}
 
 	// Player Join
@@ -67,8 +70,8 @@ public class PListener implements Listener {
 	// Player Chat (Lowest)
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	public void onPlayerChatLowest(final AsyncPlayerChatEvent event) {
-		synchronized (cachedChatEvents) {
-			cachedChatEvents.put(event, event.getMessage());
+		synchronized (cachedEvents) {
+			cachedEvents.put(event, event.getMessage());
 		}
 	}
 
@@ -77,31 +80,40 @@ public class PListener implements Listener {
 	public void onPlayerChat(final AsyncPlayerChatEvent event) {
 
 		String origMessage;
-		synchronized (cachedChatEvents) {
-			origMessage = cachedChatEvents.remove(event);
+		synchronized (cachedEvents) {
+			origMessage = cachedEvents.remove(event);
 		}
 
 		if (getConfig.PlayerChat()) {
 			Player player = event.getPlayer();
 			World world = player.getWorld();
-			String msg = event.getMessage();
-
-			if (origMessage != null && !origMessage.equals(msg)) {
-				// The message has been altered
-				msg = origMessage + " --> " + msg;
-			}
+			String msg = FormatMessage(origMessage, event.getMessage());
 
 			datadb.add(player, "chat", msg, world, event.isCancelled());
 		}
 	}
 
-	// Player Command
+	// Player Command (Lowest)
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+	public void onPlayerCmdLowest(final PlayerCommandPreprocessEvent event) {
+		synchronized (cachedEvents) {
+			cachedEvents.put(event, event.getMessage());
+		}
+	}
+
+	// Player Command (Monitor)
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
 	public void onPlayerCmd(final PlayerCommandPreprocessEvent event) {
+
+		String origMessage;
+		synchronized (cachedEvents) {
+			origMessage = cachedEvents.remove(event);
+		}
+
 		if (getConfig.PlayerCommands()) {
 			Player player = event.getPlayer();
 			World world = player.getWorld();
-			String msg = event.getMessage();
+			String msg = FormatMessage(origMessage, event.getMessage());
 			String msg2[] = event.getMessage().split(" ");
 			Boolean log = true;
 			if (getConfig.BlackListCommands() || getConfig.BlackListCommandsMySQL()) {
@@ -160,16 +172,30 @@ public class PListener implements Listener {
 		}
 	}
 
-	// Player Sign Change event
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	// Player Sign Change event (Lowest)
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+	public void onSignLowest(SignChangeEvent event) {
+		synchronized (cachedSignEvents) {
+			cachedSignEvents.put(event, FormatSignText(event.getLines()));
+		}
+	}
+
+	// Player Sign Change event (Monitor)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
 	public void onSign(SignChangeEvent event) {
-		if (event.isCancelled() == false) {
-			if (getConfig.PlayerSignText()) {
-				Player player = event.getPlayer();
-				World world = player.getWorld();
-				String[] lines = event.getLines();
-				datadb.add(player, "sign", "[" + lines[0] + "]" + "[" + lines[1] + "]" + "[" + lines[2] + "]" + "[" + lines[3] + "]", world);
-			}
+	
+		String origLines;
+		synchronized (cachedSignEvents) {
+			origLines = cachedSignEvents.remove(event);
+		}
+
+		String signLines = FormatSignText(event.getLines());
+		String formattedMsg = FormatMessage(origLines, signLines);
+
+		if (getConfig.PlayerSignText() || !signLines.equals(formattedMsg) || event.isCancelled()) {
+			Player player = event.getPlayer();
+			World world = player.getWorld();
+			datadb.add(player, "sign", formattedMsg, world, event.isCancelled());
 		}
 	}
 
@@ -247,4 +273,26 @@ public class PListener implements Listener {
 			}
 		}
 	}
+
+	private String FormatMessage(String origMessage, String message) {
+
+		if (origMessage == null || origMessage.equals(message)) {
+			return message;
+		}
+		else {
+			// The message has been altered
+			if (message.equals("/nullcmd")) {
+				// This happens when admins use /bcast or similar
+				// Log the original command
+				return origMessage;
+			} else {
+				return origMessage + " --> " + message;
+			}
+		}
+	}
+
+	private String FormatSignText(String[] lines) {
+		return "[" + lines[0] + "]" + "[" + lines[1] + "]" + "[" + lines[2] + "]" + "[" + lines[3] + "]";
+	}
+
 }
