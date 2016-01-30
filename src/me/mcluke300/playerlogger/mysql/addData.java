@@ -77,10 +77,14 @@ public class addData {
 
 	// MySQL
 	public void add(Player player, String type, String data, World world) {
-		add(player, type, data, world, false);
+		add(player, type, data, world, false, "");
 	}
 
 	public void add(Player player, String type, String data, World world, boolean cancelled) {
+		add(player, type, data, world, cancelled, "");
+	}
+
+	public void add(Player player, String type, String data, World world, boolean cancelled, String senderName) {
 		if (con == null) return;
 		
 		int x = 0, y = 0, z = 0;
@@ -93,7 +97,10 @@ public class addData {
 			z = player.getLocation().getBlockZ();
 			rec.playername = player.getName();
 		} else {
-			rec.playername = "";
+			if (senderName == null)
+				rec.playername = "";
+			else
+				rec.playername = senderName;
 		}
 
 		if (world != null) {

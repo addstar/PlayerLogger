@@ -35,12 +35,14 @@ public class PListener implements Listener {
 
 	IdentityHashMap<PlayerEvent, String> cachedEvents;
 	IdentityHashMap<SignChangeEvent, String> cachedSignEvents;
+	IdentityHashMap<ServerCommandEvent, String> cachedConsoleCommands;
 
 	public PListener(playerlogger instance) {
 		plugin = instance;
 		datadb = new addData(plugin);
 		cachedEvents = new IdentityHashMap<PlayerEvent, String>();
 		cachedSignEvents = new IdentityHashMap<SignChangeEvent, String>();
+		cachedConsoleCommands = new IdentityHashMap<ServerCommandEvent, String>();
 	}
 
 	// Player Join
@@ -217,11 +219,26 @@ public class PListener implements Listener {
 		}
 	}
 
-	// Console Logger
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	// Console Logger (Lowest)
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+	public void onPlayerConsoleCommandLowest(ServerCommandEvent event) {
+		synchronized (cachedConsoleCommands) {
+			cachedConsoleCommands.put(event, event.getCommand());
+		}
+	}
+
+	// Console Logger (Monitor)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
 	public void onPlayerConsoleCommand(ServerCommandEvent event) {
-		String msg = event.getCommand();
-		datadb.add(null, "console", msg, null);
+
+		String origCommand;
+		synchronized (cachedConsoleCommands) {
+			origCommand = cachedConsoleCommands.remove(event);
+		}
+
+		String msg = FormatMessage(origCommand, event.getCommand());
+		String senderName = event.getSender().getName();
+		datadb.add(null, "console", msg, null, false, senderName);
 	}
 
 	// BlockPlace
