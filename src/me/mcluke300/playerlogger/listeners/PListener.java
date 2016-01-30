@@ -298,13 +298,21 @@ public class PListener implements Listener {
 		}
 		else {
 			// The message has been altered
+			
 			if (message.equals("/nullcmd")) {
 				// This happens when admins use /bcast or similar
+				// It also happens for certain commands used at console
 				// Log the original command
 				return origMessage;
-			} else {
-				return origMessage + " --> " + message;
 			}
+
+			if (message.equals("commandhelper null")) {
+				// This happens when admins use a CH-handled command at console
+				// Log the original command followed by {commandhelper}
+				return origMessage + " {commandhelper}";
+			}
+
+			return origMessage + " --> " + message;
 		}
 	}
 
