@@ -46,7 +46,7 @@ public class PListener implements Listener {
 		cachedEvents = new IdentityHashMap<PlayerEvent, String>();
 		cachedSignEvents = new IdentityHashMap<SignChangeEvent, String>();
 		cachedConsoleCommands = new IdentityHashMap<ServerCommandEvent, String>();
-		numberMatcher = Pattern.compile("^\\d+$");
+		numberMatcher = Pattern.compile("^[0-9.]+$");
 	}
 
 	// Player Join
