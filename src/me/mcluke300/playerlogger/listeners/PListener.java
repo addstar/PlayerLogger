@@ -2,6 +2,8 @@ package me.mcluke300.playerlogger.listeners;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import me.mcluke300.playerlogger.playerlogger;
 import me.mcluke300.playerlogger.config.*;
@@ -32,6 +34,7 @@ import org.bukkit.inventory.ItemStack;
 public class PListener implements Listener {
 	playerlogger plugin;
 	addData datadb;
+	Pattern numberMatcher;
 
 	IdentityHashMap<PlayerEvent, String> cachedEvents;
 	IdentityHashMap<SignChangeEvent, String> cachedSignEvents;
@@ -43,6 +46,7 @@ public class PListener implements Listener {
 		cachedEvents = new IdentityHashMap<PlayerEvent, String>();
 		cachedSignEvents = new IdentityHashMap<SignChangeEvent, String>();
 		cachedConsoleCommands = new IdentityHashMap<ServerCommandEvent, String>();
+		numberMatcher = Pattern.compile("^\\d+$");
 	}
 
 	// Player Join
@@ -90,6 +94,15 @@ public class PListener implements Listener {
 			Player player = event.getPlayer();
 			World world = player.getWorld();
 			String msg = FormatMessage(origMessage, event.getMessage());
+
+			if (event.isCancelled()) {
+				Matcher match = numberMatcher.matcher(origMessage);
+				if (match.matches()) {
+					// The original message was simply a number and it was cancelled
+					// This was most likely a market purchase; do not log it
+					return;
+				}
+			}
 
 			datadb.add(player, "chat", msg, world, event.isCancelled());
 		}
@@ -293,7 +306,7 @@ public class PListener implements Listener {
 
 	private String FormatMessage(String origMessage, String message) {
 
-		if (origMessage == null || origMessage.equals(message)) {
+		if (origMessage == null || origMessage.replace('§', '&').equals(message.replace('§', '&'))) {
 			return message;
 		}
 		else {
