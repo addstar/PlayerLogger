@@ -6,7 +6,7 @@ import java.util.List;
 import me.mcluke300.playerlogger.playerlogger;
 
 public class config {
-	playerlogger plugin;
+	final playerlogger plugin;
 
 	public config(playerlogger instance) {
 		plugin = instance;
@@ -15,13 +15,13 @@ public class config {
 	public static void LoadConfiguration() {
 
 		// BlackList
-		List<String> words = new ArrayList<String>();
-		words.add("7");
-		words.add("46");
-		words.add("57");
+		List<String> words = new ArrayList<>();
+		words.add("Bedrock");
+		words.add("tnt");
+		words.add("diamond_block");
 
 		// Commands not to log
-		List<String> cmds = new ArrayList<String>();
+		List<String> cmds = new ArrayList<>();
 		cmds.add("/login");
 		cmds.add("/changepassword");
 		cmds.add("/register");

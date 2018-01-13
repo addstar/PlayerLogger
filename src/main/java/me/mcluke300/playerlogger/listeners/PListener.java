@@ -32,20 +32,20 @@ import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class PListener implements Listener {
-	playerlogger plugin;
-	addData datadb;
-	Pattern numberMatcher;
+	final playerlogger plugin;
+	final addData datadb;
+	final Pattern numberMatcher;
 
-	IdentityHashMap<PlayerEvent, String> cachedEvents;
-	IdentityHashMap<SignChangeEvent, String> cachedSignEvents;
-	IdentityHashMap<ServerCommandEvent, String> cachedConsoleCommands;
+	final IdentityHashMap<PlayerEvent, String> cachedEvents;
+	final IdentityHashMap<SignChangeEvent, String> cachedSignEvents;
+	final IdentityHashMap<ServerCommandEvent, String> cachedConsoleCommands;
 
 	public PListener(playerlogger instance) {
 		plugin = instance;
 		datadb = new addData(plugin);
-		cachedEvents = new IdentityHashMap<PlayerEvent, String>();
-		cachedSignEvents = new IdentityHashMap<SignChangeEvent, String>();
-		cachedConsoleCommands = new IdentityHashMap<ServerCommandEvent, String>();
+		cachedEvents = new IdentityHashMap<>();
+		cachedSignEvents = new IdentityHashMap<>();
+		cachedConsoleCommands = new IdentityHashMap<>();
 		numberMatcher = Pattern.compile("^[0-9.]+$");
 	}
 
@@ -56,7 +56,7 @@ public class PListener implements Listener {
 			if (event.getResult() == PlayerLoginEvent.Result.ALLOWED) {
 				Player player = event.getPlayer();
 				World world = player.getWorld();
-				String ip = "Error";
+				String ip;
 				ip = event.getAddress().getHostAddress();
 				datadb.add(player, "join", ip, world);
 			}
@@ -74,7 +74,7 @@ public class PListener implements Listener {
 	}
 
 	// Player Chat (Lowest)
-	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerChatLowest(final AsyncPlayerChatEvent event) {
 		synchronized (cachedEvents) {
 			cachedEvents.put(event, event.getMessage());
@@ -82,7 +82,7 @@ public class PListener implements Listener {
 	}
 
 	// Player Chat (Monitor)
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerChat(final AsyncPlayerChatEvent event) {
 
 		String origMessage;
@@ -109,7 +109,7 @@ public class PListener implements Listener {
 	}
 
 	// Player Command (Lowest)
-	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerCmdLowest(final PlayerCommandPreprocessEvent event) {
 		synchronized (cachedEvents) {
 			cachedEvents.put(event, event.getMessage());
@@ -117,7 +117,7 @@ public class PListener implements Listener {
 	}
 
 	// Player Command (Monitor)
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerCmd(final PlayerCommandPreprocessEvent event) {
 
 		String origMessage;
@@ -133,7 +133,7 @@ public class PListener implements Listener {
 			Boolean log = true;
 			if (getConfig.BlackListCommands() || getConfig.BlackListCommandsMySQL()) {
 				for (String m : getConfig.CommandsToBlock()) {
-					m = m.toString().toLowerCase();
+					m = m.toLowerCase();
 					if (msg2[0].equalsIgnoreCase(m)) {
 						log = false;
 						break;
@@ -175,7 +175,6 @@ public class PListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onBucket(PlayerBucketEmptyEvent event) {
 		if (getConfig.PlayerBucketPlace()) {
-			if (event.isCancelled() == false) {
 				Player player = event.getPlayer();
 				World world = player.getWorld();
 				if (event.getBucket() != null && event.getBucket() == Material.LAVA_BUCKET) {
@@ -183,12 +182,11 @@ public class PListener implements Listener {
 				} else if (event.getBucket() != null && event.getBucket() == Material.WATER_BUCKET) {
 					datadb.add(player, "bucket", "Water", world);
 				}
-			}
 		}
 	}
 
 	// Player Sign Change event (Lowest)
-	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onSignLowest(SignChangeEvent event) {
 		synchronized (cachedSignEvents) {
 			cachedSignEvents.put(event, FormatSignText(event.getLines()));
@@ -196,7 +194,7 @@ public class PListener implements Listener {
 	}
 
 	// Player Sign Change event (Monitor)
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onSign(SignChangeEvent event) {
 	
 		String origLines;
@@ -233,7 +231,7 @@ public class PListener implements Listener {
 	}
 
 	// Console Logger (Lowest)
-	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerConsoleCommandLowest(ServerCommandEvent event) {
 		synchronized (cachedConsoleCommands) {
 			cachedConsoleCommands.put(event, event.getCommand());
@@ -241,7 +239,7 @@ public class PListener implements Listener {
 	}
 
 	// Console Logger (Monitor)
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerConsoleCommand(ServerCommandEvent event) {
 
 		String origCommand;
@@ -257,15 +255,16 @@ public class PListener implements Listener {
 	// BlockPlace
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onBlockPlace(BlockPlaceEvent event) {
-		if (event.isCancelled() == false) {
+
 			if (getConfig.LogBlackListedBlocks()) {
 				Player player = event.getPlayer();
 				World world = player.getWorld();
-				String blockid = "" + event.getBlock().getTypeId();
+				String blockid = "" + event.getBlock().getType().getId();
+				String material = event.getBlock().getType().name();
 				Boolean log = false;
 				for (String m : getConfig.Blocks()) {
-					m = m.toString().toLowerCase();
-					if (blockid.equals(m) || m.equalsIgnoreCase("*")) {
+					m = m.toLowerCase();
+					if (blockid.equals(m) || m.equalsIgnoreCase(material) || m.equalsIgnoreCase("*")) {
 						log = true;
 						break;
 					}
@@ -276,21 +275,20 @@ public class PListener implements Listener {
 					datadb.add(player, "place", blockname, world);
 				}
 			}
-		}
 	}
 
 	// BlockBreak
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onBlockBreak(BlockBreakEvent event) {
-		if (event.isCancelled() == false) {
 			if (getConfig.LogBlackListedBlocks()) {
 				Player player = event.getPlayer();
 				World world = player.getWorld();
-				String blockid = String.valueOf(event.getBlock().getTypeId());
+				String blockid = String.valueOf(event.getBlock().getType().getId());
+				String material = event.getBlock().getType().name();
 				Boolean log = false;
 				for (String m : getConfig.Blocks()) {
-					m = m.toString().toLowerCase();
-					if (blockid.equalsIgnoreCase(m) || m.equalsIgnoreCase("*")) {
+					m = m.toLowerCase();
+					if (blockid.equalsIgnoreCase(m) || m.equalsIgnoreCase(material) || m.equalsIgnoreCase("*")) {
 						log = true;
 						break;
 					}
@@ -301,7 +299,6 @@ public class PListener implements Listener {
 					datadb.add(player, "break", blockname, world);
 				}
 			}
-		}
 	}
 
 	private String FormatMessage(String origMessage, String message) {

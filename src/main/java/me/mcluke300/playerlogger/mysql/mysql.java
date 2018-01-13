@@ -54,7 +54,7 @@ public class mysql {
 				if (connection != null) {
 					connection.close();
 				}
-			} catch (SQLException ex) {
+			} catch (SQLException ignored) {
 			}
 		}
 	}

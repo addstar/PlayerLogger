@@ -5,7 +5,7 @@ import java.util.List;
 import me.mcluke300.playerlogger.playerlogger;
 
 public class getConfig {
-	playerlogger plugin;
+	final playerlogger plugin;
 
 	public getConfig(playerlogger instance) {
 		plugin = instance;
@@ -56,7 +56,13 @@ public class getConfig {
 
 		LogBlackListedBlocks = playerlogger.plugin.getConfig().getBoolean("BlackList.LogBlackListedBlocks");
 		Blocks = playerlogger.plugin.getConfig().getStringList("BlackList.Blocks");
-
+		for(String m: Blocks){
+		    try {
+                Integer i = Integer.valueOf(m);
+                playerlogger.plugin.Log("Block Black List is still using integers. Please update to use a list of material Names - this will break in 1.13");
+            }catch (NumberFormatException ignored){
+            }
+		}
 		BlackListCommands = playerlogger.plugin.getConfig().getBoolean("Commands.BlackListCommands");
 		BlackListCommandsMySQL = playerlogger.plugin.getConfig().getBoolean("Commands.BlackListCommandsForMySQL");
 		CommandsToBlock = playerlogger.plugin.getConfig().getStringList("Commands.CommandsToBlock");
