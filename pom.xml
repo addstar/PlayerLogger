@@ -2,14 +2,38 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>me.mcluke300</groupId>
   <artifactId>PlayerLogger</artifactId>
-  <version>2.9.1-b${env.BUILD_NUMBER}</version>
+  <version>2.9.1-SNAPSHOT</version>
   <name>PlayerLogger</name>
-
+    <scm>
+        <connection>scm:git:git@github.com:AddstarMC/PlayerLogger.git</connection>
+        <developerConnection>scm:git:git@github.com:AddstarMC/PlayerLogger.git</developerConnection>
+        <url>https://github.com/AddstarMC/PlayerLogger</url>
+        <tag>HEAD</tag>
+    </scm>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <build.number />
+        <plugin.version>${project.version}-${build.number}</plugin.version>
+        <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
+        <spigot.version>1.12.2-R0.1-SNAPSHOT</spigot.version>
+    </properties>
+    <developers>
+        <developer>
+            <id>AddstarMC</id>
+            <name>AddstarMC</name>
+            <url>http://github.com/AddstarMC</url>
+            <roles>
+                <role>developer</role>
+                <role>maintainer</role>
+            </roles>
+            <timezone>10</timezone>
+        </developer>
+    </developers>
   <repositories>
     <!-- For spigot -->
     <repository>
       <id>md5-repo</id>
-      <url>http://repo.md-5.net/content/groups/public/</url>
+      <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
       <releases><enabled>true</enabled></releases>
       <snapshots><enabled>true</enabled></snapshots>
     </repository>
@@ -36,7 +60,7 @@
     <!-- For Vault -->
     <repository>
       <id>theyeticave</id>
-      <url>http://nexus.theyeticave.net/content/repositories/pub_releases/</url>
+      <url>http://nexus.hc.to/content/repositories/pub_releases/</url>
     </repository>
 
     <!-- Other repositories -->
@@ -50,15 +74,21 @@
     <!-- Bukkit -->
     <dependency>
       <groupId>org.spigotmc</groupId>
-      <artifactId>spigot</artifactId>
-      <version>1.7.10-R0.1-SNAPSHOT</version>
+      <artifactId>spigot-api</artifactId>
+      <version>${spigot.version}</version>
     </dependency>
     
     <!-- Used for Economy interop -->
     <dependency>
       <groupId>net.milkbowl.vault</groupId>
-      <artifactId>Vault</artifactId>
-      <version>1.4.1</version>
+      <artifactId>VaultAPI</artifactId>
+      <version>1.6</version>
+        <exclusions>
+            <exclusion>
+                <groupId>org.bukkit</groupId>
+                <artifactId>bukkit</artifactId>
+            </exclusion>
+        </exclusions>
     </dependency>
   </dependencies>
 
