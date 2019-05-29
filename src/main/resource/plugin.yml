@@ -1,8 +1,9 @@
 name: PlayerLogger
 version: ${plugin.version}
 description: Logs player events.
+api-version: ${spigot.api.version}
 author: McLuke300, add5tar
-main: me.mcluke300.playerlogger.playerlogger
+main: me.mcluke300.playerlogger.PlayerLogger
 
 loadbefore: [PwnFilter, CommandHelper]
 
