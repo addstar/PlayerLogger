@@ -23,6 +23,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -148,12 +149,12 @@ public class PListener implements Listener {
 
     // Player Deaths
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPlayerDeath(EntityDeathEvent event) {
-        Entity ent = event.getEntity();
-        if ((ent instanceof Player) && (Config.PlayerDeaths())) {
-            Player player = (Player) event.getEntity();
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        if (Config.PlayerDeaths()) {
+            Player player = event.getEntity();
             World world = player.getWorld();
-            datadb.add(player, "death", "", world);
+            String msg = event.getDeathMessage();
+            datadb.add(player, "death", msg, world);
         }
     }
 
@@ -166,7 +167,7 @@ public class PListener implements Listener {
             Map<Enchantment, Integer> ench = event.getEnchantsToAdd();
             ItemStack item = event.getItem();
             int cost = event.getExpLevelCost();
-            datadb.add(player, "enchant", item + " " + ench + " Xp Cost:" + cost, world);
+            datadb.add(player, "enchant", item + " " + ench + " (XP Cost:" + cost + ")", world);
         }
     }
 
