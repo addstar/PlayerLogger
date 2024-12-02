@@ -53,7 +53,7 @@ public class PlayerLoggerCommand implements CommandExecutor {
     }
 
     private void doHelp(CommandSender sender) {
-        sender.sendMessage(ChatColor.RED + "Usage: /playerlogger <reload|info>");
+        sender.sendMessage(ChatColor.RED + "Usage: /playerlogger <reload|cache>");
     }
 
 }
