@@ -34,6 +34,7 @@ public class MySQL {
             // Make table if it does not exist query onEnable
             rs = st.executeUpdate("CREATE TABLE IF NOT EXISTS `" + tableName + "` "
                     + "(`id` INT(11) unsigned NOT NULL AUTO_INCREMENT,"
+                    + "`playeruuid` varchar(36),"
                     + "`playername` varchar(20),"
                     + "`type` varchar(15),"
                     + "`time` INT(255),"
@@ -46,6 +47,7 @@ public class MySQL {
                     + "`cancelled` TINYINT,"
                     + "PRIMARY KEY (`id`),"
                     + "KEY `time` (`time`),"
+                    + "KEY `playeruuid` (`playeruuid`),"
                     + "KEY `playername` (`playername`),"
                     + "KEY `type` (`type`))");
 

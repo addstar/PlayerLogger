@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -73,7 +74,9 @@ public class DataRecorder {
             y = player.getLocation().getBlockY();
             z = player.getLocation().getBlockZ();
             rec.playername = player.getName();
+            rec.playeruuid = player.getUniqueId().toString();
         } else {
+            rec.playeruuid = "";
             if (senderName == null)
                 rec.playername = "";
             else
@@ -147,21 +150,22 @@ public class DataRecorder {
                 plugin.DebugLog("Saving " + copy.size() + " records...");
 
                 // Prepared statement
-                pst = con.prepareStatement("INSERT INTO " + tablename + " (playername, type, time, data, x, y, z, world, server, cancelled) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                pst = con.prepareStatement("INSERT INTO " + tablename + " (playeruuid, playername, type, time, data, x, y, z, world, server, cancelled) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
                 // Save all the queued records
                 for (DataRec rec : copy) {
                     // Values
-                    pst.setString(1, rec.playername);
-                    pst.setString(2, rec.type);
-                    pst.setLong(3, rec.time);
-                    pst.setString(4, rec.data);
-                    pst.setInt(5, rec.x);
-                    pst.setInt(6, rec.y);
-                    pst.setInt(7, rec.z);
-                    pst.setString(8, rec.worldname);
-                    pst.setString(9, servername);
-                    pst.setByte(10, rec.cancelled);
+                    pst.setString(1, rec.playeruuid);
+                    pst.setString(2, rec.playername);
+                    pst.setString(3, rec.type);
+                    pst.setLong(4, rec.time);
+                    pst.setString(5, rec.data);
+                    pst.setInt(6, rec.x);
+                    pst.setInt(7, rec.y);
+                    pst.setInt(8, rec.z);
+                    pst.setString(9, rec.worldname);
+                    pst.setString(10, servername);
+                    pst.setByte(11, rec.cancelled);
 
                     // Do the MySQL query
                     pst.executeUpdate();
@@ -202,6 +206,7 @@ public class DataRecorder {
     }
 
     static class DataRec {
+        String playeruuid;
         String playername;
         String type;
         String data;
