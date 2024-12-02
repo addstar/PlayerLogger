@@ -34,6 +34,12 @@ public class PlayerLoggerCommand implements CommandExecutor {
                         Config.getValues();
                         plugin.getDataSource().initialize();
                         sender.sendMessage(ChatColor.GREEN + "PlayerLogger Config Reloaded");
+                    } else if (args[0].equalsIgnoreCase("cache")) {
+                        sender.sendMessage(ChatColor.GREEN + "PlayerLogger caches:");
+                        sender.sendMessage(ChatColor.YELLOW + "  - PlayerEvents: " + plugin.getPlayerListener().cachedEvents.size());
+                        sender.sendMessage(ChatColor.YELLOW + "  - DeathEvents: " + plugin.getPlayerListener().cachedDeathEvents.size());
+                        sender.sendMessage(ChatColor.YELLOW + "  - SignEvents: " + plugin.getPlayerListener().cachedSignEvents.size());
+                        sender.sendMessage(ChatColor.YELLOW + "  - ConsoleCommands: " + plugin.getPlayerListener().cachedConsoleCommands.size());
                     } else {
                         doHelp(sender);
                     }
@@ -47,7 +53,7 @@ public class PlayerLoggerCommand implements CommandExecutor {
     }
 
     private void doHelp(CommandSender sender) {
-        sender.sendMessage(ChatColor.RED + "Usage: /playerlogger reload");
+        sender.sendMessage(ChatColor.RED + "Usage: /playerlogger <reload|info>");
     }
 
 }

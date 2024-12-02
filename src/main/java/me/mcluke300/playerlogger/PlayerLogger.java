@@ -21,6 +21,8 @@ public class PlayerLogger extends JavaPlugin {
 
     private MySQL dataSource;
 
+    private PListener playerListener;
+
     @Override
     public void onEnable() {
         plugin = this;
@@ -31,7 +33,8 @@ public class PlayerLogger extends JavaPlugin {
         dataSource.initialize();
 
         // Registering Listeners
-        Bukkit.getServer().getPluginManager().registerEvents(new PListener(this), this);
+        playerListener = new PListener(this);
+        Bukkit.getServer().getPluginManager().registerEvents(playerListener, this);
 
         // Commands
         // Command
@@ -52,5 +55,9 @@ public class PlayerLogger extends JavaPlugin {
 
     public void Log(String msg) {
         System.out.println("[PlayerLogger] " + msg);
+    }
+
+    public PListener getPlayerListener() {
+        return playerListener;
     }
 }
