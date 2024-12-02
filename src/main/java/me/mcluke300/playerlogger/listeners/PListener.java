@@ -37,13 +37,15 @@ public class PListener implements Listener {
     private final DataRecorder datadb;
     private final Pattern numberMatcher;
 
-    private final IdentityHashMap<PlayerEvent, String> cachedEvents;
-    private final IdentityHashMap<SignChangeEvent, String> cachedSignEvents;
-    private final IdentityHashMap<ServerCommandEvent, String> cachedConsoleCommands;
+    public final IdentityHashMap<PlayerEvent, String> cachedEvents;
+    public final IdentityHashMap<PlayerDeathEvent, String> cachedDeathEvents;
+    public final IdentityHashMap<SignChangeEvent, String> cachedSignEvents;
+    public final IdentityHashMap<ServerCommandEvent, String> cachedConsoleCommands;
 
     public PListener(PlayerLogger instance) {
         datadb = new DataRecorder(instance);
         cachedEvents = new IdentityHashMap<>();
+        cachedDeathEvents = new IdentityHashMap<>();
         cachedSignEvents = new IdentityHashMap<>();
         cachedConsoleCommands = new IdentityHashMap<>();
         numberMatcher = Pattern.compile("^[0-9.]+$");
@@ -147,14 +149,30 @@ public class PListener implements Listener {
         }
     }
 
+    // Player Chat (Lowest)
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerDeathLowest(PlayerDeathEvent event) {
+        synchronized (cachedEvents) {
+            cachedDeathEvents.put(event, event.getDeathMessage());
+        }
+    }
+
     // Player Deaths
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerDeath(PlayerDeathEvent event) {
         if (Config.PlayerDeaths()) {
+            String origMsg;
+            synchronized (cachedDeathEvents) {
+                origMsg = cachedDeathEvents.remove(event);
+            }
+
+            // Use the original message if it was tracked because the death message
+            // is often altered/erased by another plugin in the event chain
+            String deathMsg = origMsg == null ? event.getDeathMessage() : origMsg;
+
             Player player = event.getEntity();
             World world = player.getWorld();
-            String msg = event.getDeathMessage();
-            datadb.add(player, "death", msg, world);
+            datadb.add(player, "death", deathMsg, world);
         }
     }
 

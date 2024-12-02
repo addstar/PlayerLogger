@@ -76,7 +76,7 @@ public class DataRecorder {
             rec.playername = player.getName();
             rec.playeruuid = player.getUniqueId().toString();
         } else {
-            rec.playeruuid = "";
+            rec.playeruuid = null;
             if (senderName == null)
                 rec.playername = "";
             else
